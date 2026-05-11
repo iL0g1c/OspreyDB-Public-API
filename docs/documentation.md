@@ -10,10 +10,10 @@ If you exceed these limits, the API will return a 429 Too Many Requests status c
 ## 2. Pagination
 For endpoints that return lists of data, pagination is enabled by default to optimize performance.
 ### Query Parameters
-| Parameter | Type | Default | Description                    |   |
-|-----------|------|---------|--------------------------------|---|
-| page      | int  | 1       | The page number to retrieve.   |   |
-| per_page  | int  | 20      | Items per page (Maximum: 100). |   |
+| Parameter | Type | Default | Description                    |
+|-----------|------|---------|--------------------------------|
+| page      | int  | 1       | The page number to retrieve.   |
+| per_page  | int  | 20      | Items per page (Maximum: 100). |
 
 **Example:** https://api.gms-admin.net/api/v1/online?page=2&per_page=10
 
@@ -34,8 +34,10 @@ Retrieves the full profile for a specific account using its unique Account ID (a
   * Method: GET
   * Path Params: acid (integer)
   * Example Request: GET https://api.gms-admin.net/api/v1/users/12345
+
 **Example Response:**
 ```
+{
   "_id": "60d5ec...",
   "accountID": 12345,
   "currentCallsign": "RAVEN-1",
@@ -53,6 +55,7 @@ A specialized route to retrieve only the events array for a specific user. This 
 
 **Example Response:**
 ```
+{
   "events": [
     {"type": "login", "timestamp": "2026-05-11T12:00:00Z"},
     {"type": "callsign_change", "old": "HAWK-2", "new": "RAVEN-1"}
@@ -84,5 +87,22 @@ Example Response:
       "pastCallsigns": ["HAWK-2"]
     }
   ]
+}
+```
+
+## 4. Error Handling
+The API uses standard HTTP status codes to indicate success or failure:
+| Status Code               | Description                                                             |
+|---------------------------|-------------------------------------------------------------------------|
+| 200 OK                    | The request was successful.                                             |
+| 400 Bad Request           | Missing parameters (e.g., missing callsign in search) or invalid types. |
+| 404 Not Found             | The requested Account ID (acid) does not exist.                         |
+| 429 Too Many Requests     | You have hit the rate limit.                                            |
+| 500 Internal Server Error | Something went wrong on our end.                                        |
+
+Example Error Response:
+```
+{
+  "error": "Missing 'callsign' query parameter"
 }
 ```
