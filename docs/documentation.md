@@ -1,5 +1,5 @@
 # API Documentation: OspreyDB-Public-API
-This documentation outlines the usage, endpoints, and constraints for the GMS Admin API.
+This documentation outlines the usage, endpoints, and constraints for the OspreyDB Public API.
 **Base URL:** https://api.gms-admin.net/api/v1/
 ## 1. Rate Limiting
 To ensure stability and fair usage, the API implements rate limiting via Flask-Limiter. Limits are applied per IP address.
