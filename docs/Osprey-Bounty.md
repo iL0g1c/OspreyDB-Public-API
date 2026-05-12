@@ -3,11 +3,13 @@ At OspreyX, we take the security of our users' data seriously. We encourage secu
 
 **Start date:** TO BE DETERMINED. DO NOT ATTEMPT THE BOUNTY YET.
 
+# Safe Harbor
+If you conduct your security research and disclosure in accordance with this policy, we will not initiate or support any legal action related to your research.
+
 # Scope
 ## In-Scope
   * Primary API Endpoint: [https://api.gms-admin.net/api/v1](https://api.gms-admin.net/api/v1)
   * Tread carefully regarding container escapes, insecure Docker socket configurations, or SSRF (Server-Side Request Forgery) that could allow access to internal metadata or peer services. Please report these findings based on a theoretical Proof of Concept or limited interaction only.
-  * If you conduct your security research and disclosure in accordance with this policy, we will not initiate or support any legal action related to your research.
 ## Out of Scope & Prohibited Actions
 We use the "Stop at the Door" policy. The following actions are strictly prohibited and will result in immediate disqualification from the program and loss of Safe Harbor:
   * **Lateral Movement:** Attempting to pivot from the API to the host machine, other containers, or internal network services.
@@ -15,6 +17,7 @@ We use the "Stop at the Door" policy. The following actions are strictly prohibi
   * **Infrastructure/Hosting Provider:** Vulnerabilities in the underlying hosting provider (e.g., Cloudflare or ISP) are out of scope unless they are caused by a misconfiguration in our API deployment.
 # Severity Levels & Rewards
 Use the CVSS (Common Vulnerability Scoring System) to categorize bugs. This prevents disputes over how much a bug is "worth."
+In the event of duplicate reports, only the first researcher to report the vulnerability will be eligible for a reward.
 | Severity | CVSS Range | OspreyDB-Specific Examples                                                                                                                                                                                                                               | Estimated Reward                          |
 |----------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
 | Critical | 9.0 - 10.0 | Remote Code Execution (RCE) or gaining write/delete access to the MongoDB database. Finding a way to leak the .env file containing DATABASE_TOKEN or DASHBOARD_TOKEN.                                                                                    | $10 + Hacker Overlord Role (Or anything you want) + Hall of Fame |
