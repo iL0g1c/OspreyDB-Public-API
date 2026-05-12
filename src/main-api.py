@@ -145,4 +145,4 @@ def search_callsign():
 dashboard.config.security_token = DASHBOARD_TOKEN
 dashboard.bind(app)
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5011)
+    app.run(host='0.0.0.0', port=5011)
