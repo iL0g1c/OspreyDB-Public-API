@@ -50,7 +50,8 @@ def paginate_query(collection, query=None, projection=None):
         
         if page < 1: page = 1
         if per_page < 1: per_page = 1
-        elif per_page > 100: per_page = 100 
+        if page > 1000000: page = 1000000
+        if per_page > 100: per_page = 100 
     except ValueError:
         return jsonify({"error": "Pagination parameters must be integers"}), 400
 
