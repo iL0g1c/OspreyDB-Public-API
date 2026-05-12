@@ -1,7 +1,7 @@
 # Program Overview
 At OspreX, we take the security seriously. We encourage security researchers to help us identify vulnerabilities in our API. In return for your responsible disclosure, we offer up to 10 dollars and various swag in the GeoFS Open Source Community Server based on the severity of the impact.
 
-**Start date:** TO BE DETERMINED. DO NOT ATTEMPT THE BOUNTY YET.
+# **Start date:** TO BE DETERMINED. DO NOT ATTEMPT THE BOUNTY YET.
 
 # Safe Harbor
 If you conduct your security research and disclosure in accordance with this policy, we will not initiate or support any legal action related to your research.
