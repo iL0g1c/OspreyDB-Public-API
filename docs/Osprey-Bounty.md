@@ -33,7 +33,8 @@ To qualify for a reward and remain in "Safe Harbor" (legal protection), research
   * Confidentiality: Do not disclose the vulnerability to the public until it has been remediated and you have received explicit permission.
   * Exploitation Limit: Once a "Proof of Concept" (PoC) is established (e.g., proving you can read a file), stop testing and report it immediately.
 # Focus Areas
-We are particularly interested in vulnerabilities that could compromise the integrity of the OspreyDB database or the privacy of other services. Please focus your efforts on the following:
+We are particularly interested in vulnerabilities that could compromise the integrity of the OspreyDB database or the privacy of other services.\
+Please focus your efforts on the following:
   * NoSQL Injection: The /api/v1/search endpoint utilizes a query parameter to search across multiple fields using an $or operator. We are interested in any payloads that can "break out" of this query to extract unauthorized data or bypass the pagination logic.
   * Rate-Limit Bypasses (IP Spoofing): The API relies on the CF-Connecting-IP header to identify users for rate limiting. We want to know if these limits can be bypassed by spoofing this header or if the implementation allows for IP-based denial of service against other users.
   * Administrative Access Bypass: The flask_monitoringdashboard is configured with a DASHBOARD_TOKEN. Any method that allows access to this dashboard without the correct token is a high priority.
@@ -42,8 +43,7 @@ We are particularly interested in vulnerabilities that could compromise the inte
   * Container & Environment Security: Since the API runs within a Docker container, we are interested in vulnerabilities that could allow an attacker to view the .env file or environment variables, such as DATABASE_TOKEN.
 
 # Submission Method & Template
-Submit reports to Osprey via Discord DM "x_aiwass_x"
-
+Submit reports to Osprey via Discord DM "x_aiwass_x"\
 **Suggested Reporting Format:**
   * Summary: Brief description of the vulnerability.
   * Impact: What can an attacker do with this?
