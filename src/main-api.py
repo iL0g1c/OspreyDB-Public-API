@@ -14,15 +14,18 @@ DATABASE_TOKEN = os.getenv('DATABASE_TOKEN')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 DATABASE_IP = os.getenv('DATABASE_IP')
 DATABASE_USER = os.getenv('DATABASE_USER')
+DASHBOARD_TOKEN = os.getenv('DASHBOARD_TOKEN')
 
 app = Flask(__name__)
 app.config["MONGO_URI"] = f"mongodb://{DATABASE_USER}:{DATABASE_TOKEN}@{DATABASE_IP}:27017/{DATABASE_NAME}?directConnection=true&serverSelectionTimeoutMS=2000&authSource={DATABASE_NAME}"
 mongo = PyMongo(app)
 
+def get_cloudflare_ip():
+    return request.headers.get("CF-Connecting-IP", request.remote_addr)
+
 limiter = Limiter(
-    key_func=get_remote_address,
+    key_func=get_cloudflare_ip,
     app=app,
-    # Replace default_limits with application_limits
     application_limits=["10 per second"], 
     storage_uri="memory://", 
 )
@@ -33,7 +36,7 @@ def parse_json(data):
     return json.loads(dumps(data))
 
 def paginate_query(collection, query=None, projection=None):
-    """Scaffolding that allows any query to paginate."""
+    """Paginates through a collection of documents."""
     if query is None:
         query = {}
         
@@ -41,10 +44,9 @@ def paginate_query(collection, query=None, projection=None):
         page = int(request.args.get('page', 1))
         per_page = int(request.args.get('per_page', 20))
         
-        if page < 1: 
-            page = 1
-        if per_page > 100: 
-            per_page = 100 
+        if page < 1: page = 1
+        if per_page < 1: per_page = 1
+        elif per_page > 100: per_page = 100 
     except ValueError:
         return jsonify({"error": "Pagination parameters must be integers"}), 400
 
@@ -64,6 +66,36 @@ def paginate_query(collection, query=None, projection=None):
         "count": len(results)
     })
 
+def paginate_document_array(collection, query, array_field):
+    """Paginates a massive array inside a single document using $slice."""
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 50)) # Default 50 for events
+        
+        if page < 1: page = 1
+        if per_page < 1: per_page = 1
+        elif per_page > 100: per_page = 100 
+    except ValueError:
+        return jsonify({"error": "Pagination parameters must be integers"}), 400
+
+    skip = (page - 1) * per_page
+
+    document = collection.find_one_or_404(
+        query, 
+        {array_field: {"$slice": [skip, per_page]}, "_id": 0}
+    )
+    
+    # Extract the array from the document, defaulting to empty list if it doesn't exist
+    results = parse_json(document).get(array_field, [])
+    
+    return jsonify({
+        "page": page,
+        "per_page": per_page,
+        "results": results,
+        "count": len(results)
+    })
+
+
 # --- API ENDPOINTS ---
 
 @app.route('/api/v1/users/<int:acid>', methods=['GET'])
@@ -72,7 +104,6 @@ def get_account(acid):
     Returns a specific account by its exact Account ID (acid).
     """
     # Use find_one_or_404 to ensure a proper error if the acid doesn't exist
-    print(acid)
     account = mongo.db.users.find_one_or_404({"accountID": acid})
     return jsonify(parse_json(account))
 
@@ -80,8 +111,7 @@ def get_account(acid):
 @limiter.limit("5 per second")
 def get_account_events(acid):
     """Returns just the events array for a specific account."""
-    account = mongo.db.users.find_one_or_404({"accountID": acid}, {"events": 1, "_id": 0})
-    return jsonify(parse_json(account))
+    return paginate_document_array(mongo.db.users, {"accountID": acid}, "events")
 
 @app.route('/api/v1/online', methods=['GET'])
 def get_online():
@@ -108,6 +138,7 @@ def search_callsign():
     
     return paginate_query(mongo.db.users, query)
 
+dashboard.config.security_token = DASHBOARD_TOKEN
 dashboard.bind(app)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5011)
