@@ -4,7 +4,6 @@
 IMAGE_NAME="ospreydb-api"
 CONTAINER_NAME="ospreydb-api-instance"
 PORT="5011"
-STORAGE_LIMIT="100G"
 
 echo "Building Docker image: $IMAGE_NAME..."
 docker build -t $IMAGE_NAME .
@@ -23,7 +22,6 @@ docker run -d \
   --name $CONTAINER_NAME \
   -p $PORT:$PORT \
   --env-file src/.env \
-  --storage-opt size=$STORAGE_LIMIT \
   --log-driver json-file \
   --log-opt max-size=10m \
   --log-opt max-file=3 \
