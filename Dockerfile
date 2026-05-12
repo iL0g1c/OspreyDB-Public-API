@@ -1,16 +1,15 @@
 # Use a specific, slim version for a smaller attack surface
-FROM python:3.11-slim [cite: 1]
+FROM python:3.11-slim
 
 # Create a non-privileged user to run the application
-# This prevents an attacker from having root access even if they break the app
 RUN useradd -m -s /bin/bash appuser
 
 # Set the working directory
 WORKDIR /app
 
-# Copy and install requirements as root (to ensure permissions are set)
+# Copy and install requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt [cite: 2]
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the source code
 COPY src/ ./src/
