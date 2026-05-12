@@ -22,7 +22,8 @@ mongo = PyMongo(app)
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
-    default_limits=["10 per second"],
+    # Replace default_limits with application_limits
+    application_limits=["10 per second"], 
     storage_uri="memory://", 
 )
 
