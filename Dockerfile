@@ -1,25 +1,32 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Use a specific, slim version for a smaller attack surface
+FROM python:3.11-slim [cite: 1]
 
-# Set the working directory inside the container
+# Create a non-privileged user to run the application
+# This prevents an attacker from having root access even if they break the app
+RUN useradd -m -s /bin/bash appuser
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the requirements file into the container
+# Copy and install requirements as root (to ensure permissions are set)
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt [cite: 2]
 
-# Install the required packages
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the source code into the container
+# Copy the source code
 COPY src/ ./src/
 
-# Expose port 5011, which your Flask app uses
+# Change ownership of the app directory to our non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to the non-privileged user
+USER appuser
+
+# Expose the application port
 EXPOSE 5011
 
-# Set environment variables to prevent Python from writing .pyc files 
-# and to ensure stdout and stderr are printed directly to the terminal
+# Standard Python environment hygiene
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Run the API script when the container launches
+# Run the API script
 CMD ["python", "src/main-api.py"]
