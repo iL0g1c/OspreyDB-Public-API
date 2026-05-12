@@ -43,6 +43,7 @@ We are particularly interested in vulnerabilities that could compromise the inte
 
 # Submission Method & Template
 Submit reports to Osprey via Discord DM "x_aiwass_x"
+
 **Suggested Reporting Format:**
   * Summary: Brief description of the vulnerability.
   * Impact: What can an attacker do with this?
