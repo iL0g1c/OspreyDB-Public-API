@@ -1,5 +1,5 @@
 # Program Overview
-At OsprX, we take the security of our users' data seriously. We encourage security researchers to help us identify vulnerabilities in our API. In return for your responsible disclosure, we offer up to 10 dollars and various swag in the GeoFS Open Source Community Server based on the severity of the impact.
+At OsprX, we take the security seriously. We encourage security researchers to help us identify vulnerabilities in our API. In return for your responsible disclosure, we offer up to 10 dollars and various swag in the GeoFS Open Source Community Server based on the severity of the impact.
 
 **Start date:** TO BE DETERMINED. DO NOT ATTEMPT THE BOUNTY YET.
 
