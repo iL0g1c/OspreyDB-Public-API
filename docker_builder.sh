@@ -22,7 +22,7 @@ echo "Starting container with $STORAGE_LIMIT limit..."
 docker run -d \
   --name $CONTAINER_NAME \
   -p $PORT:$PORT \
-  --env-file .env \
+  --env-file src/.env \
   --storage-opt size=$STORAGE_LIMIT \
   --log-driver json-file \
   --log-opt max-size=10m \
