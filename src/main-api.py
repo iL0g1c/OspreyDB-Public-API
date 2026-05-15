@@ -8,6 +8,7 @@ import json
 from dotenv import load_dotenv
 import os
 import flask_monitoringdashboard as dashboard
+from datetime import datetime
 
 # --- CONFIGURATION ---
 load_dotenv()
@@ -101,7 +102,7 @@ def paginate_document_array(collection, query, array_field):
     })
 
 
-# --- API ENDPOINTS ---
+# --- V1 API ENDPOINTS ---
 
 @app.route('/api/v1/users/<int:acid>', methods=['GET'])
 def get_account(acid):
@@ -142,6 +143,90 @@ def search_callsign():
     }
     
     return paginate_query(mongo.db.users, query)
+
+# --- V2 API ENDPOINTS ---
+@app.route('/api/v2/events/filter', methods=['GET'])
+def get_filtered_events():
+    """Filter any event by a aggregation pipeline server side."""
+
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+        
+        if page < 1: page = 1
+        if per_page < 1: per_page = 1
+        if page > 1000000: page = 1000000
+        if per_page > 100: per_page = 100 
+    except ValueError:
+        return jsonify({"error": "Pagination parameters must be integers"}), 400
+    
+    skip = (page - 1) * per_page
+
+    acid = request.args.get('acid', type=int)
+    event_type =request.args.get('event_type', default='all')
+    after_date_str = request.args.get('after')
+    before_date_str = request.args.get('before')
+
+    pipeline = []
+
+    # Stage 1: Initial Match
+    if acid is not None:
+        pipeline.append({"$match": {"accountID": acid}})
+
+    # Stage 2: Unwind the array so we can filter individual events
+    pipeline.append({"$unwind": "$events"})
+
+    # Stage 3: Event-Level Match
+    event_match = {}
+    
+    if event_type and event_type.lower() != "all":
+        if event_type.lower() == "on-off":
+            event_match["events.eventType"] = {"$in": ["online", "offline"]}
+        else:
+            event_match["events.eventType"] = event_type
+
+    if after_date_str or before_date_str:
+        event_match["events.timestamp"] = {}
+        if after_date_str:
+            event_match["events.timestamp"]["$gte"] = datetime.fromisoformat(after_date_str)
+        if before_date_str:
+            event_match["events.timestamp"]["$lte"] = datetime.fromisoformat(before_date_str)
+
+    if event_match:
+        pipeline.append({"$match": event_match})
+
+    # Stage 4: Sort (Descending)
+    pipeline.append({"$sort": {"events.timestamp": -1}})
+
+    # Stage 5: Paginate
+    pipeline.append({
+        "$facet": {
+            "metadata": [{"$count": "total"}],
+            "data": [
+                {"$skip": skip},
+                {"$limit": per_page},
+                {
+                    "$project": {
+                        "_id": 0,
+                        "accountID": 1,
+                        "event": "$events"
+                    }
+                }
+            ]
+        }
+    })
+
+    cursor = list(mongo.db.users.aggregate(pipeline))
+
+    total_count = cursor[0]["metadata"][0]["total"] if cursor[0]["metadata"] else 0
+    results = cursor[0]["data"]
+
+    return jsonify({
+        "page": page,
+        "per_page": per_page,
+        "count": total_count,
+        "results": parse_json(results)
+    })
 
 dashboard.config.security_token = DASHBOARD_TOKEN
 dashboard.bind(app)
