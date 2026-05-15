@@ -229,6 +229,6 @@ def get_filtered_events():
     })
 
 dashboard.config.security_token = DASHBOARD_TOKEN
-dashboard.bind(app)
+# dashboard.bind(app)
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5011)
