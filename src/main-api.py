@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 from bson.json_util import dumps
 import json
 from dotenv import load_dotenv
@@ -17,6 +18,9 @@ DATABASE_USER = os.getenv('DATABASE_USER')
 DASHBOARD_TOKEN = os.getenv('DASHBOARD_TOKEN')
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 app.config["MONGO_URI"] = f"mongodb://{DATABASE_USER}:{DATABASE_TOKEN}@{DATABASE_IP}:27017/{DATABASE_NAME}?directConnection=true&serverSelectionTimeoutMS=2000&authSource={DATABASE_NAME}"
 mongo = PyMongo(app)
 
@@ -46,7 +50,8 @@ def paginate_query(collection, query=None, projection=None):
         
         if page < 1: page = 1
         if per_page < 1: per_page = 1
-        elif per_page > 100: per_page = 100 
+        if page > 1000000: page = 1000000
+        if per_page > 100: per_page = 100 
     except ValueError:
         return jsonify({"error": "Pagination parameters must be integers"}), 400
 
