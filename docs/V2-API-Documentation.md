@@ -38,8 +38,9 @@ Filters any event using server-side aggregation. Allows searching by account, ev
     - ```before``` (string, optional): ISO date string to filter events occurring before this time.
   - Example Request: ```GET /api/v2/events/filter?acid=12345&event_type=login&page=1&per_page=5```
 
-Example Response:
+**Example Response:**
 ```
+{
   "count": 1,
   "page": 1,
   "per_page": 5,
@@ -54,7 +55,16 @@ Example Response:
   ]
 }
 ```
-Get Account DetailsRetrieves the full profile for a specific account. Unlike the v1 API which uses path parameters, v2 uses a query parameter.URL: /api/v2/users/Method: GETQuery Params: * acid (int) — RequiredExample Request: GET /api/v2/users/?acid=12345Example Response:JSON{
+### Get Account Details
+Retrieves the full profile for a specific account. Unlike the v1 API which uses path parameters, v2 uses a query parameter.
+  - URL: ```/api/v2/users/```
+  - Method: ```GET```
+  - Query Params:* ```acid``` (int) — Required
+  - Example Request: ```GET /api/v2/users/?acid=12345```
+
+**Example Response:**
+```
+{
   "_id": "60d5ec...",
   "accountID": 12345,
   "currentCallsign": "RAVEN-1",
@@ -62,7 +72,23 @@ Get Account DetailsRetrieves the full profile for a specific account. Unlike the
   "events": [...],
   "pastCallsigns": ["HAWK-2", "VULTURE-5"]
 }
-Callsign Cross-CheckPerforms cross-account callsign similarity pairing. Calculates seed documents based on an Account ID or Regex pattern, extracts callsigns, and paginates through matches from other accounts.URL: /api/v2/callsign-cross-checkMethod: GETQuery Parameters:page (int, default: 1)per_page (int, default: 10)acid (int, optional): The Account ID to use as a seed.pattern (string, optional): Regex pattern to find seed callsigns (e.g., /pattern/flags). Valid flags: i, m, x, s.Note: You must provide either acid or pattern.Example Request: GET /api/v2/callsign-cross-check?acid=12345Example Response:JSON{
+```
+### Callsign Cross-Check
+Performs cross-account callsign similarity pairing. Calculates seed documents based on an Account ID or Regex pattern, extracts callsigns, and paginates through matches from other accounts.
+
+  - URL: ```/api/v2/callsign-cross-check```
+  - Method: ```GET```
+  - Query Parameters:
+    - ```page``` (int, default: 1)
+    - ```per_page``` (int, default: 10)
+    - ```acid``` (int, optional): The Account ID to use as a seed.
+    - ```pattern``` (string, optional): Regex pattern to find seed callsigns (e.g., ```/pattern/flags```). Valid flags: i, m, x, s.
+    - Note: You must provide either acid or pattern.
+  - Example Request: ```GET /api/v2/callsign-cross-check?acid=12345```
+
+**Example Response:**
+```
+{
   "count": 2,
   "page": 1,
   "per_page": 10,
@@ -76,13 +102,41 @@ Callsign Cross-CheckPerforms cross-account callsign similarity pairing. Calculat
     }
   ]
 }
-Get Earliest EventReturns the absolute earliest recorded event for a specific account.URL: /api/v2/events/earliestMethod: GETQuery Params: * acid (int) — RequiredExample Request: GET /api/v2/events/earliest?acid=12345Example Response:JSON{
+```
+### Get Earliest Event
+Returns the absolute earliest recorded event for a specific account.
+  - URL: ```/api/v2/events/earliest```
+  - Method: ```GET```
+  - Query Params:
+    - ```acid``` (int) — Required
+  - Example Request: ```GET /api/v2/events/earliest?acid=12345```
+
+**Example Response:**
+```
+{
   "event": {
     "type": "account_created",
     "timestamp": "2024-01-01T08:00:00Z"
   }
 }
-Search UsersSearch accounts by an exact past callsign or a regex pattern.URL: /api/v2/users/searchMethod: GETQuery Parameters:page (int, default: 1)per_page (int, default: 10)exact_callsign (string, optional): Searches for an exact case-insensitive match in past callsigns.pattern (string, optional): Regex pattern to search past callsigns (e.g., /pattern/flags). Valid flags: i, m, x, s.Note: You must provide either exact_callsign or pattern.Example Request: GET /api/v2/users/search?pattern=/^RAVEN/iExample Response:JSON{
+```
+
+### Search Users
+Search accounts by an exact past callsign or a regex pattern.
+
+  - URL: ```/api/v2/users/search```
+  - Method: ```GET```
+  - Query Parameters:
+    - ```page``` (int, default: 1)
+    - ```per_page``` (int, default: 10)
+    - ```exact_callsign``` (string, optional): Searches for an exact case-insensitive match in past callsigns.
+    - ```pattern``` (string, optional): Regex pattern to search past callsigns (e.g., /pattern/flags). Valid flags: i, m, x, s.
+    - Note: You must provide either exact_callsign or pattern.
+  - Example Request: ```GET /api/v2/users/search?pattern=/^RAVEN/i```
+
+**Example Response:**
+```
+{
   "count": 1,
   "page": 1,
   "per_page": 10,
@@ -94,4 +148,20 @@ Search UsersSearch accounts by an exact past callsign or a regex pattern.URL: /a
     }
   ]
 }
-4. Error HandlingThe API uses standard HTTP status codes to indicate success or failure:
+```
+## Error Handling
+The API uses standard HTTP status codes to indicate success or failure:
+| Status Code               | Description                                                                                                        |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------|
+| 200 OK                    | The request was successful.                                                                                        |
+| 400 Bad Request           | Missing required parameters (e.g., neither acid nor pattern provided), invalid parameter types, or bad formatting. |
+| 404 Not Found             | The requested Account ID (acid) or event does not exist.                                                           |
+| 429 Too Many Requests     | You have hit the rate limit (10 req/sec).                                                                          |
+| 500 Internal Server Error | An unexpected error occurred on the server.                                                                        |
+
+**Example Error Response:**
+```
+{
+  "error": "Must provide 'acid' or 'pattern'"
+}
+```
